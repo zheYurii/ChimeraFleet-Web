@@ -6,7 +6,7 @@ import type { NewCar } from '../models/Car';
 export default function CreateCarPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<NewCar>({
-    brand: '', model: '', doorsNumber: 5, luggageCapacity: 0,
+    brand: '', model: '', doorsNumber: 5, trunkCapacity: 0,
     engineCapacity: 0, fuelType: 1, productionDate: '',
     averageFuelConsumption: 0, bodyType: 1
   });
@@ -57,7 +57,7 @@ export default function CreateCarPage() {
         </div>
         <div className="chimera-form-group">
           <label>Pojemność bagażnika (L)</label>
-          <input required type="number" name="luggageCapacity" value={formData.luggageCapacity} onChange={handleChange} className="chimera-input" />
+          <input required type="number" name="trunkCapacity" value={formData.trunkCapacity} onChange={handleChange} className="chimera-input" />
         </div>
         <div className="chimera-form-group">
           <label>Pojemność silnika (cm³)</label>

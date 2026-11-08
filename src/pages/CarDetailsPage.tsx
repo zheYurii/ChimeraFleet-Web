@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router';
 import { getCarById } from '../services/carService';
 import type { Car } from '../models/Car';
 import { FuelTypeMap, BodyTypeMap } from '../models/Car';
+import axios from 'axios';
 
 export default function CarDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,9 @@ export default function CarDetailsPage() {
         const data = await getCarById(id as string, controller.signal);
         setCar(data);
       } catch (err: any) {
+        if (axios.isCancel(err)){
+            return;
+        }
         if (err.name !== 'AbortError') setError(err.message);
       } finally {
         setIsLoading(false);
@@ -39,7 +43,7 @@ export default function CarDetailsPage() {
         <div className="chimera-detail-item"><strong>ID Pojazdu:</strong> {car.id}</div>
         <div className="chimera-detail-item"><strong>Data produkcji:</strong> {car.productionDate}</div>
         <div className="chimera-detail-item"><strong>Liczba drzwi:</strong> {car.doorsNumber}</div>
-        <div className="chimera-detail-item"><strong>Poj. bagażnika:</strong> {car.luggageCapacity} L</div>
+        <div className="chimera-detail-item"><strong>Poj. bagażnika:</strong> {car.trunkCapacity} L</div>
         <div className="chimera-detail-item"><strong>Poj. silnika:</strong> {car.engineCapacity} cm³</div>
         <div className="chimera-detail-item"><strong>Średnie spalanie:</strong> {car.averageFuelConsumption} L/100km</div>
         <div className="chimera-detail-item"><strong>Typ paliwa:</strong> {FuelTypeMap[car.fuelType] || 'Nieznany'}</div>

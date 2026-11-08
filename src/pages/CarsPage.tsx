@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import type { Car } from '../models/Car';
 import { getCars, deleteCar } from '../services/carService';
+import axios from 'axios';
 
 export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
@@ -18,6 +19,9 @@ export default function CarsPage() {
         setCars(data);
         setError(null);
       } catch (err: any) {
+        if (axios.isCancel(err)){
+            return;
+        }
         if (err.name !== 'AbortError') {
           setError(err.message || 'Wystąpił błąd podczas ładowania floty.');
         }

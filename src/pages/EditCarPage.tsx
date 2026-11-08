@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { getCarById, updateCar } from '../services/carService';
 import type { NewCar } from '../models/Car';
+import axios from 'axios';
 
 export default function EditCarPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,9 @@ export default function EditCarPage() {
         const { id: _, ...carData } = data as any; 
         setFormData(carData);
       } catch (err: any) {
+        if (axios.isCancel(err)){
+            return;
+        }
         if (err.name !== 'AbortError') alert(`Błąd: ${err.message}`);
       } finally {
         setIsLoading(false);
@@ -77,7 +81,7 @@ export default function EditCarPage() {
         </div>
         <div className="chimera-form-group">
           <label>Pojemność bagażnika (L)</label>
-          <input required type="number" name="luggageCapacity" value={formData.luggageCapacity} onChange={handleChange} className="chimera-input" />
+          <input required type="number" name="trunkCapacity" value={formData.trunkCapacity} onChange={handleChange} className="chimera-input" />
         </div>
         <div className="chimera-form-group">
           <label>Pojemność silnika (cm³)</label>
