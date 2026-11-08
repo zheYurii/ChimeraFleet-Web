@@ -12,3 +12,17 @@ export interface Car {
 }
 
 export type NewCar = Omit<Car, 'id'>;
+
+export const FuelTypeMap: Record<number, string> = {
+  1: 'Benzyna',
+  2: 'Diesel',
+  3: 'Gaz',
+  4: 'Elektryczne'
+};
+
+export const BodyTypeMap: Record<number, string> = {
+  1: 'Hatchback',
+  2: 'Sedan',
+  3: 'Kombi',
+  4: 'SUV'
+};
