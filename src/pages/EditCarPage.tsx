@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { getCarById, updateCar } from '../services/carService';
 import type { NewCar } from '../models/Car';
+import { toInputDate } from '../models/Car';
 import axios from 'axios';
 
 export default function EditCarPage() {
@@ -18,6 +19,7 @@ export default function EditCarPage() {
       try {
         const data = await getCarById(id as string, controller.signal);
         const { id: _, ...carData } = data as any; 
+        carData.productionDate = toInputDate(carData.productionDate);
         setFormData(carData);
       } catch (err: any) {
         if (axios.isCancel(err)){
@@ -33,15 +35,28 @@ export default function EditCarPage() {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (!formData) return;
     const { name, value, type } = e.target;
     
     const isNumberField = type === 'number' || name === 'fuelType' || name === 'bodyType';
+
+    let processedValue: any;
+
+    if (isNumberField) {
+      if (value === '') {
+        processedValue = '' as any;
+      } else {
+        processedValue = Number(value);
+      }
+    } else {
+      processedValue = value;
+    }
 
     setFormData(prev => {
       if (!prev) return prev;
       return {
         ...prev,
-        [name]: isNumberField ? Number(value) : value
+        [name]: processedValue
       };
     });
   };

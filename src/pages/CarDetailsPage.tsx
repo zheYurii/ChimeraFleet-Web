@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import axios from 'axios';
 import { getCarById } from '../services/carService';
-import { FuelTypeMap, BodyTypeMap } from '../models/Car';
+import { FuelTypeMap, BodyTypeMap, toShowDate } from '../models/Car';
 import type { Car } from '../models/Car';
 import { useCarUiStore } from '../store/useCarUiStore';
 
@@ -45,7 +45,7 @@ export default function CarDetailsPage() {
       <h1 className="miku-text">{car.brand} {car.model} {isFavorite && '★'}</h1>
       <div className="chimera-details-grid">
         <div className="chimera-detail-item"><strong>ID Pojazdu:</strong> {car.id}</div>
-        <div className="chimera-detail-item"><strong>Data produkcji:</strong> {car.productionDate}</div>
+        <div className="chimera-detail-item"><strong>Data produkcji:</strong> {toShowDate(car.productionDate)}</div>
         <div className="chimera-detail-item"><strong>Liczba drzwi:</strong> {car.doorsNumber}</div>
         <div className="chimera-detail-item"><strong>Poj. bagażnika:</strong> {car.trunkCapacity} L</div>
         <div className="chimera-detail-item"><strong>Poj. silnika:</strong> {car.engineCapacity} cm³</div>

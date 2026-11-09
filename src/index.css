@@ -9,6 +9,10 @@
   --text-muted: #8b8b9e;
 }
 
+body {
+  background-color: var(--bg-dark);
+}
+
 .chimera-container {
   padding: 2rem;
   background-color: var(--bg-dark);

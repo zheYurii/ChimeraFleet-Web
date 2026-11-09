@@ -16,11 +16,23 @@ export default function CreateCarPage() {
     
     const isNumberField = type === 'number' || name === 'fuelType' || name === 'bodyType';
 
+    let processedValue: any;
+
+    if (isNumberField) {
+      if (value === '') {
+        processedValue = '' as any;
+      } else {
+        processedValue = Number(value);
+      }
+    } else {
+      processedValue = value;
+    }
+
     setFormData(prev => {
       if (!prev) return prev;
       return {
         ...prev,
-        [name]: isNumberField ? Number(value) : value
+        [name]: processedValue
       };
     });
   };

@@ -26,3 +26,19 @@ export const BodyTypeMap: Record<number, string> = {
   3: 'Kombi',
   4: 'SUV'
 };
+
+export const toInputDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  return dateStr.split('T')[0];
+};
+
+export const toShowDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  const dateOnly = dateStr.split('T')[0];
+  const parts = dateOnly.split('-');
+  
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return dateStr;
+};
