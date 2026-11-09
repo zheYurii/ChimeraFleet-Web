@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
+import axios from 'axios';
 import type { Car } from '../models/Car';
 import { getCars, deleteCar } from '../services/carService';
-import axios from 'axios';
+import CarCard from '../components/CarCard';
+import { useCarUiStore } from '../store/useCarUiStore';
 
 export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const searchTerm = useCarUiStore((state) => state.searchTerm);
+  const setSearchTerm = useCarUiStore((state) => state.setSearchTerm);
+  const showFavoritesOnly = useCarUiStore((state) => state.showFavoritesOnly);
+  const setShowFavoritesOnly = useCarUiStore((state) => state.setShowFavoritesOnly);
+  const favoriteCarIds = useCarUiStore((state) => state.favoriteCarIds);
+  const removeFavorite = useCarUiStore((state) => state.removeFavorite);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -19,22 +28,16 @@ export default function CarsPage() {
         setCars(data);
         setError(null);
       } catch (err: any) {
-        if (axios.isCancel(err)){
-            return;
-        }
-        if (err.name !== 'AbortError') {
-          setError(err.message || 'Wystąpił błąd podczas ładowania floty.');
-        }
+        if (axios.isCancel(err)) return;
+        setError(err.message || 'Wystąpił błąd podczas ładowania floty.');
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     }
-
     fetchCars();
-
-    return () => {
-      controller.abort();
-    };
+    return () => controller.abort();
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -43,62 +46,59 @@ export default function CarsPage() {
 
     try {
       await deleteCar(id);
+      removeFavorite(id);
       setCars((prevCars) => prevCars.filter((car) => car.id !== id));
     } catch (err: any) {
       alert(`Błąd podczas usuwania: ${err.message}`);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="chimera-container">
-        <div className="chimera-loader miku-glow">Inicjalizacja terminala ChimeraFleet...</div>
-      </div>
-    );
-  }
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const visibleCars = cars.filter((car) => {
+    const matchesSearch = 
+      car.brand.toLowerCase().includes(normalizedSearch) || 
+      car.model.toLowerCase().includes(normalizedSearch);
+    
+    const matchesFavorite = !showFavoritesOnly || favoriteCarIds.includes(car.id);
+    
+    return matchesSearch && matchesFavorite;
+  });
 
-  if (error) {
-    return (
-      <div className="chimera-container">
-        <div className="chimera-error teto-glow">Błąd krytyczny: {error}</div>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="chimera-container"><div className="chimera-loader miku-glow">Inicjalizacja terminala ChimeraFleet...</div></div>;
+  if (error) return <div className="chimera-container"><div className="chimera-error teto-glow">Błąd krytyczny: {error}</div></div>;
 
   return (
     <div className="chimera-container">
       <header className="chimera-header">
         <h1 className="miku-text">Rejestr Pojazdów</h1>
-        <Link to="/cars/new" className="chimera-btn btn-primary miku-border">
-          + Nowy Pojazd
-        </Link>
+        <Link to="/cars/new" className="chimera-btn btn-primary miku-border">+ Nowy Pojazd</Link>
       </header>
 
-      {cars.length === 0 ? (
-        <div className="chimera-empty">Brak pojazdów we flocie ChimeraFleet.</div>
+      <div className="cars-toolbar">
+        <input
+          type="search"
+          placeholder="Szukaj po marce lub modelu..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="chimera-input search-input"
+        />
+        <label className="favorite-filter miku-text">
+          <input
+            type="checkbox"
+            checked={showFavoritesOnly}
+            onChange={(e) => setShowFavoritesOnly(e.target.checked)}
+            className="chimera-checkbox"
+          />
+          Tylko ulubione jednostki
+        </label>
+      </div>
+
+      {visibleCars.length === 0 ? (
+        <div className="chimera-empty">Brak pojazdów spełniających kryteria.</div>
       ) : (
         <div className="chimera-grid">
-          {cars.map((car) => (
-            <div key={car.id} className="chimera-card">
-              <div className="chimera-card-header">
-                <h2 className="teto-text">{car.brand}</h2>
-                <span className="chimera-model">{car.model}</span>
-              </div>
-              <div className="chimera-card-actions">
-                <Link to={`/cars/${car.id}`} className="chimera-btn btn-outline miku-border">
-                  Szczegóły
-                </Link>
-                <Link to={`/cars/${car.id}/edit`} className="chimera-btn btn-outline miku-border">
-                  Edytuj
-                </Link>
-                <button 
-                  onClick={() => handleDelete(car.id)} 
-                  className="chimera-btn btn-danger teto-border"
-                >
-                  Usuń
-                </button>
-              </div>
-            </div>
+          {visibleCars.map((car) => (
+            <CarCard key={car.id} car={car} onDelete={handleDelete} />
           ))}
         </div>
       )}
